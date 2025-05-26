@@ -1,6 +1,6 @@
 body {
   font-family: 'Arial', sans-serif;
-  background-color: #f4f4f4;
+  background-color: #222;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -8,30 +8,41 @@ body {
   margin: 0;
 }
 
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #222;
+}
+
 .calculator {
-  background-color: #ffffff;
-  border-radius: 10px;
+  background-color: #222;
+  border-radius: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 300px;
   padding: 20px;
 }
 
 .display {
-  background-color: #222;
-  color: #fff;
-  font-size: 2em;
+  background: #111;
+  color: #0f0;
+  font-size: 2.5rem;
   text-align: right;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  height: 50px;
-  overflow: hidden;
+  padding: 1rem;
+  border-radius: 8px 8px 0 0;
+  min-width: 260px;
+  letter-spacing: 2px;
+  margin-bottom: 0;
 }
 
 .keypad {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 60px);
   gap: 10px;
+  background: #222;
+  padding: 20px;
+  border-radius: 0 0 8px 8px;
 }
 
 .button {
@@ -45,12 +56,41 @@ body {
   transition: background-color 0.3s;
 }
 
+.keypad button {
+  background: #333;
+  color: #fff;
+  font-size: 1.5rem;
+  border: none;
+  border-radius: 6px;
+  padding: 18px 0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
 .button:hover {
   background-color: #0056b3;
 }
 
+.keypad button:hover {
+  background: #555;
+}
+
 .button:active {
   background-color: #004494;
+}
+
+.keypad button:active {
+  background: #888;
+}
+
+.keypad button:nth-child(4n) {
+  background: #f90;
+  color: #222;
+}
+
+.keypad button:last-child {
+  background: #0af;
+  color: #fff;
 }
 
 .error {
