@@ -56,7 +56,11 @@ const useCalculatorLogic = () => {
     if (result === 'ERROR' || Math.abs(result) > MAX_VALUE) {
       setDisplay('ERROR')
     } else {
-      setSafeDisplay(Number(result.toFixed(8)))
+      const resultStr = result.toString()
+      const finalResult = resultStr.includes('.') ? 
+        resultStr.replace(/\.?0+$/, '') : 
+        resultStr
+      setSafeDisplay(finalResult)
     }
     setOperation(null)
     setPreviousValue(null)
