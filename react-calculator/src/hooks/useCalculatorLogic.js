@@ -8,6 +8,7 @@ const useCalculatorLogic = () => {
   const [operation, setOperation] = useState(null)
   const [previousValue, setPreviousValue] = useState(null)
   const [waitingForOperand, setWaitingForOperand] = useState(false)
+  const [fullOperation, setFullOperation] = useState('')
 
   const setSafeDisplay = val => {
     if (Math.abs(val) > MAX_VALUE) {
@@ -16,7 +17,9 @@ const useCalculatorLogic = () => {
     }
     const str = String(val)
     if (str.replace('-', '').length > MAX_LENGTH) {
-      setDisplay('ERROR')
+      // Para resultados periódicos
+      const truncated = Number(val).toFixed(MAX_LENGTH - str.split('.')[0].length - 1)
+      setDisplay(truncated)
       return
     }
     setDisplay(str)
@@ -27,40 +30,68 @@ const useCalculatorLogic = () => {
     if (waitingForOperand) {
       setDisplay(num === '.' ? '0.' : num)
       setWaitingForOperand(false)
+      setFullOperation(previousValue + operation + (num === '.' ? '0.' : num))
     } else {
       if (display.length >= MAX_LENGTH) return
       if (num === '.' && display.includes('.')) return
-      setDisplay(display === '0' && num !== '.' ? num : display + num)
+      const newDisplay = display === '0' && num !== '.' ? num : display + num
+      setDisplay(newDisplay)
+      if (operation) {
+        setFullOperation(previousValue + operation + newDisplay)
+      } else {
+        setFullOperation(newDisplay)
+      }
     }
   }
 
   const handleOperationClick = op => {
     if (display === 'ERROR') return
-    setPreviousValue(Number(display))
+    setPreviousValue(display)
     setOperation(op)
     setWaitingForOperand(true)
+    setFullOperation(display + op)
   }
 
   const handleEqualClick = () => {
     if (display === 'ERROR' || operation === null || previousValue === null) return
     let result
     const current = Number(display)
+    const prev = Number(previousValue)
     switch (operation) {
-      case '+': result = previousValue + current; break
-      case '-': result = previousValue - current; break
-      case '*': result = previousValue * current; break
-      case '/': result = current === 0 ? 'ERROR' : previousValue / current; break
-      case '%': result = previousValue % current; break
+      case '+': result = prev + current; break
+      case '-': result = prev - current; break
+      case '*': result = prev * current; break
+      case '/': 
+        if (current === 0) {
+          setDisplay('ERROR')
+          setFullOperation('ERROR')
+          return
+        }
+        result = prev / current
+        break
+      case '%': result = prev % current; break
       default: return
     }
-    if (result === 'ERROR' || Math.abs(result) > MAX_VALUE) {
+
+    if (Math.abs(result) > MAX_VALUE) {
       setDisplay('ERROR')
+      setFullOperation('ERROR')
     } else {
       const resultStr = result.toString()
-      const finalResult = resultStr.includes('.') ? 
-        resultStr.replace(/\.?0+$/, '') : 
-        resultStr
+      let finalResult = resultStr
+      
+      if (resultStr.includes('.')) {
+        const integerPart = resultStr.split('.')[0]
+        const maxDecimals = MAX_LENGTH - integerPart.length - 1
+        if (maxDecimals > 0) {
+          finalResult = Number(result).toFixed(maxDecimals).replace(/\.?0+$/, '')
+        } else {
+          finalResult = integerPart
+        }
+      }
+      
       setSafeDisplay(finalResult)
+      setFullOperation(finalResult)
     }
     setOperation(null)
     setPreviousValue(null)
@@ -72,19 +103,22 @@ const useCalculatorLogic = () => {
     setOperation(null)
     setPreviousValue(null)
     setWaitingForOperand(false)
+    setFullOperation('')
   }
 
   const toggleNegative = () => {
     if (display === 'ERROR') return
     if (display.startsWith('-')) {
       setDisplay(display.slice(1))
+      setFullOperation(fullOperation.replace('-', ''))
     } else if (display !== '0' && display.length < MAX_LENGTH) {
       setDisplay('-' + display)
+      setFullOperation('-' + fullOperation)
     }
   }
 
   return {
-    display,
+    display: fullOperation || display,
     handleNumberClick,
     handleOperationClick,
     handleEqualClick,
